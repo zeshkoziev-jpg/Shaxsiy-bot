@@ -1,3 +1,4 @@
+from aiohttp import web
 import os
 from dotenv import load_dotenv
 import asyncio
@@ -202,9 +203,23 @@ async def got_phone(message: Message, state: FSMContext):
     await state.clear()
 
 
+async def health(request):
+    return web.Response(text="OK")
+
+
+async def start_web():
+    app = web.Application()
+    app.router.add_get("/", health)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.environ.get("PORT", 10000))
+    await web.TCPSite(runner, "0.0.0.0", port).start()
+
+
 async def main():
+    await start_web()
     await dp.start_polling(bot)
 
 
-if __name__ == "__main__":
+if name == "main":
     asyncio.run(main())
